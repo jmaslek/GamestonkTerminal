@@ -18,7 +18,8 @@ jobs:
           const issue = context.payload.issue;
           const templates = ["bug_report.md", "enhancement.md", "feature_request.md"];
           let templateMatched = false;
-          for (const template of templates) {
+
+          async function checkTemplate(template) {
             const templateContent = await github.repos.getContents({
               owner: context.repo.owner,
               repo: context.repo.repo,
@@ -28,17 +29,25 @@ jobs:
             if (content === templateContent.data.content) {
               console.log(`Issue template ${template} has not been changed.`);
               templateMatched = true;
-              break;
             }
           }
-          if (!templateMatched) {
-            console.log('Issue template has been changed.');
-          } else {
-            const params = {
-              owner: 'jmaslek',
-              repo: context.repo.repo,
-              issue_number: issue.number,
-              state: 'closed'
+
+          async function run() {
+            for (const template of templates) {
+              await checkTemplate(template);
             }
-            await github.issues.update(params);
+
+            if (!templateMatched) {
+              console.log('Issue template has been changed.');
+            } else {
+              const params = {
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                state: 'closed'
+              }
+              await github.issues.update(params);
+            }
           }
+
+          run();
