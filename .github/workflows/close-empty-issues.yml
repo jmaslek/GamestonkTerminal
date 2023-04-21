@@ -20,7 +20,7 @@ jobs:
           let templateMatched = false;
           for (const template of templates) {
             const templateContent = await github.repos.getContents({
-              owner: 'jmaslek',
+              owner: context.repo.owner,
               repo: context.repo.repo,
               path: `.github/ISSUE_TEMPLATE/${template}`
             });
