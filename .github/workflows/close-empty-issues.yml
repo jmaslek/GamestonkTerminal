@@ -13,26 +13,26 @@ jobs:
       id: check-template
       uses: actions/github-script@v6
       with:
-        github-token: ${{ secrets.GITHUB_TOKEN }}
         script: |
           const issue = context.payload.issue;
           const templates = ["bug_report.md", "enhancement.md", "feature_request.md"];
           let templateMatched = false;
 
           async function checkTemplate(template) {
-            const templateContent = await github.repos.getContents({
+            const {data: templateContent} = await github.repos.getContent({
               owner: context.repo.owner,
               repo: context.repo.repo,
               path: `.github/ISSUE_TEMPLATE/${template}`
             });
             const content = Buffer.from(issue.body, 'base64').toString();
-            if (content === templateContent.data.content) {
+            if (content === templateContent.content) {
               console.log(`Issue template ${template} has not been changed.`);
               templateMatched = true;
             }
           }
 
           async function run() {
+            const github = await getOctokit();
             for (const template of templates) {
               await checkTemplate(template);
             }
