@@ -32,7 +32,8 @@ jobs:
           }
 
           async function run() {
-            const github = await getOctokit();
+            const { GitHub, context } = require('@actions/github');
+            const github = new GitHub(process.env.GITHUB_TOKEN);
             for (const template of templates) {
               await checkTemplate(template);
             }
